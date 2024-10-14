@@ -1,0 +1,31 @@
+name: Deploy to ec2
+on: 
+    push:
+      branches:
+        -master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Deploy to ec2
+        uses: burnett01/rsync-deployments@5.1
+        with:
+          switches: -avzr --delete
+          path: ./*
+          remote_path: /var/www/my-app/
+          remote_host: <host>.compute.amazonaws.com
+          remote_user: ubuntu
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY}}
